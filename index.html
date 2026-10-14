@@ -2,652 +2,539 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy — NLP-Based Semantic Search Ranking Model</title>
-
-<!-- Fonts: a research-paper serif for headings, a clean sans for body/UI -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Semantic Search Ranking Model</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap">
 <style>
-  /* ============================================================
-     DESIGN TOKENS
-     A quiet paper-white base with one dark navy section (the hero)
-     and one deep teal accent used sparingly for emphasis.
-     ============================================================ */
-  :root{
-    --paper:       #FAF8F3;
-    --surface:     #FFFFFF;
-    --ink:         #1C2430;
-    --muted:       #5B6472;
-    --line:        #E4DFD3;
-    --navy:        #10192A;
-    --navy-line:   rgba(255,255,255,0.14);
-    --accent:      #2F6F63;
-    --accent-ink:  #1F4A41;
-    --accent-soft: #E7EFE9;
-    --gold:        #B08F4F;
-    --radius:      10px;
-    --maxw:        820px;
+  :root {
+    --ground: #F1F3F7;
+    --surface: #FFFFFF;
+    --ink: #16203A;
+    --ink-soft: #4C5675;
+    --line: #D3D9E6;
+    --signal: #2B44D9;
+    --mark: #FFE066;
+    --mark-ink: #16203A;
+    --sans: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1322;
+      --surface: #161C32;
+      --ink: #E8EBF5;
+      --ink-soft: #A5AED0;
+      --line: #2A3252;
+      --signal: #8FA3FF;
+      --mark: #7A6100;
+      --mark-ink: #FFF6D1;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1322;
+    --surface: #161C32;
+    --ink: #E8EBF5;
+    --ink-soft: #A5AED0;
+    --line: #2A3252;
+    --signal: #8FA3FF;
+    --mark: #7A6100;
+    --mark-ink: #FFF6D1;
+    color-scheme: dark;
   }
 
-  *{ box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
 
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter', -apple-system, sans-serif;
-    font-size:16px;
-    line-height:1.65;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  h1,h2,h3{
-    font-family:'Source Serif 4', Georgia, serif;
-    font-weight:600;
-    color:var(--ink);
-    margin:0;
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
   }
 
-  a{ color:var(--accent-ink); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
 
-  .wrap{
-    max-width:var(--maxw);
-    margin:0 auto;
-    padding:0 28px;
-  }
-
-  /* ---------------- NAV ---------------- */
-  #topnav{
-    position:sticky;
-    top:0;
-    z-index:50;
-    background:rgba(250,248,243,0.92);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--line);
-  }
-  #topnav .navwrap{
-    max-width:var(--maxw);
-    margin:0 auto;
-    padding:14px 28px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-  }
-  .brandmark{
-    font-family:'Source Serif 4', serif;
-    font-weight:600;
-    font-size:15px;
-    color:var(--ink);
-    white-space:nowrap;
-  }
-  .navlinks{
-    display:flex;
-    gap:22px;
-    flex-wrap:wrap;
-    font-size:13.5px;
-  }
-  .navlinks a{
-    color:var(--muted);
-    text-decoration:none;
-    border-bottom:1px solid transparent;
-    padding-bottom:2px;
-    transition:color .15s ease, border-color .15s ease;
-  }
-  .navlinks a:hover{
-    color:var(--ink);
-    border-color:var(--gold);
+  a { color: var(--signal); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
-  /* ---------------- HERO ---------------- */
-  #hero{
-    background:var(--navy);
-    color:#F2F0EA;
-    padding:76px 0 60px;
+  .skip {
+    position: absolute; left: -9999px; top: 8px;
+    background: var(--ink); color: var(--ground);
+    padding: 8px 14px; font-family: var(--sans); font-size: .9rem; z-index: 10;
   }
-  #hero .kicker{
-    font-size:13px;
-    letter-spacing:.02em;
-    color:#9FB0A6;
-    margin-bottom:14px;
+  .skip:focus { left: 12px; }
+
+  /* ---------- header ---------- */
+  .site-head {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--ground);
+    border-bottom: 1px solid var(--line);
   }
-  #hero h1{
-    font-size:clamp(30px, 4.4vw, 44px);
-    line-height:1.18;
-    color:#FFFFFF;
-    max-width:14ch;
+  .head-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; min-height: 64px;
   }
-  #hero .subtitle{
-    font-family:'Source Serif 4', serif;
-    font-style:italic;
-    font-weight:400;
-    font-size:clamp(17px, 2vw, 20px);
-    color:#C9D3CC;
-    margin-top:8px;
+  .brand {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--sans); font-weight: 700; font-size: 1.05rem;
+    color: var(--ink); text-decoration: none; letter-spacing: -0.01em;
   }
-  #hero p.desc{
-    margin-top:22px;
-    max-width:58ch;
-    color:#B9C0C9;
-    font-size:16px;
+  .brand svg { color: var(--signal); flex: none; }
+  nav { display: flex; gap: 6px; }
+  nav a {
+    font-family: var(--sans); font-weight: 600; font-size: .95rem;
+    color: var(--ink-soft); text-decoration: none;
+    padding: 6px 10px; border-radius: 3px;
   }
-  .badges{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:26px;
-  }
-  .badge{
-    font-size:12.5px;
-    color:#DCE6E1;
-    border:1px solid var(--navy-line);
-    padding:6px 13px;
-    border-radius:100px;
+  nav a:hover { color: var(--ink); }
+  nav a { line-height: 1.4; }
+  nav a[aria-current="page"] {
+    color: var(--ink);
+    background-image: linear-gradient(var(--mark), var(--mark));
+    background-repeat: no-repeat;
+    background-size: calc(100% - 20px) 9px;
+    background-position: 10px calc(100% - 7px);
   }
 
-  /* ---------------- SECTIONS ---------------- */
-  section.block{
-    padding:52px 0;
-    border-bottom:1px solid var(--line);
+  /* ---------- hero ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    gap: 56px; align-items: center;
+    padding: 72px 0 64px;
   }
-  section.block:last-of-type{ border-bottom:none; }
+  h1 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(2.2rem, 5.2vw, 3.5rem);
+    line-height: 1.05; letter-spacing: -0.025em;
+    margin: 0 0 22px;
+  }
+  .lead { font-size: 1.2rem; line-height: 1.6; color: var(--ink-soft); max-width: 46ch; margin: 0; }
 
-  .label{
-    font-size:12.5px;
-    color:var(--accent-ink);
-    font-weight:600;
-    margin-bottom:10px;
+  .rank-panel {
+    margin: 0; padding: 26px 26px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
   }
-  h2.htitle{
-    font-size:clamp(22px, 3vw, 27px);
-    margin-bottom:16px;
+  .rank-panel figcaption {
+    font-family: var(--sans); font-weight: 650; font-size: 1rem; margin-bottom: 18px;
   }
-  .lede{
-    color:var(--muted);
-    max-width:64ch;
-    margin-bottom:6px;
+  .rank-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .rank-list li { display: grid; grid-template-columns: 30px 1fr 44px; align-items: center; gap: 12px; }
+  .pos {
+    font-family: var(--sans); font-weight: 700; font-size: .9rem;
+    width: 26px; height: 26px; display: grid; place-items: center;
+    border-radius: 4px; color: var(--ink-soft); border: 1px solid var(--line);
   }
+  .rank-list li:first-child .pos { background: var(--mark); color: var(--mark-ink); border-color: transparent; }
+  .track { height: 14px; display: block; }
+  .rank-bar {
+    display: block; height: 100%; width: calc(var(--w) * 1%);
+    background: var(--signal); border-radius: 2px;
+    transform-origin: left center;
+    animation: grow .75s cubic-bezier(.2, .7, .2, 1) both;
+    animation-delay: calc(var(--i) * 90ms + 150ms);
+  }
+  .val { font-family: var(--sans); font-weight: 600; font-size: .9rem; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
+  .rank-note { margin: 18px 0 0; font-size: .92rem; line-height: 1.55; color: var(--ink-soft); }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @media (prefers-reduced-motion: reduce) { .rank-bar { animation: none; } }
 
-  ul.plain{
-    margin:16px 0 0;
-    padding:0;
-    list-style:none;
+  /* ---------- document rows ---------- */
+  .row {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 18px 56px;
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
   }
-  ul.plain li{
-    position:relative;
-    padding-left:20px;
-    margin-bottom:9px;
-    color:var(--ink);
-    max-width:62ch;
+  .row > h2 {
+    font-family: var(--sans); font-weight: 650; font-size: 1.15rem;
+    line-height: 1.3; letter-spacing: -0.01em; margin: 2px 0 0;
   }
-  ul.plain li::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:9px;
-    width:6px;
-    height:6px;
-    background:var(--accent);
-    border-radius:50%;
-  }
+  .row > h2 .n { color: var(--ink-soft); font-weight: 500; margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .body { max-width: 64ch; }
+  .body > :first-child { margin-top: 0; }
+  .body > :last-child { margin-bottom: 0; }
+  .body p { margin: 0 0 1em; }
+  .small { font-size: .92rem; line-height: 1.6; color: var(--ink-soft); }
 
-  .note{
-    margin-top:20px;
-    padding:14px 18px;
-    background:var(--accent-soft);
-    border-left:3px solid var(--accent);
-    border-radius:6px;
-    font-size:14.5px;
-    color:var(--accent-ink);
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li {
+    counter-increment: s; position: relative;
+    padding: 0 0 22px 46px;
   }
+  .steps li:last-child { padding-bottom: 0; }
+  .steps li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 1px;
+    font-family: var(--sans); font-weight: 700; font-size: .85rem;
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border-radius: 50%; background: var(--signal); color: var(--ground);
+  }
+  .steps li::after {
+    content: ""; position: absolute; left: 13.5px; top: 34px; bottom: 6px;
+    width: 1px; background: var(--line);
+  }
+  .steps li:last-child::after { display: none; }
+  .steps strong { display: block; font-family: var(--sans); font-weight: 650; font-size: 1.02rem; margin-bottom: 2px; }
 
-  /* ---------------- CARDS GRID (prototype facts) ---------------- */
-  .cardgrid{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:14px;
-    margin-top:24px;
-  }
-  .fact{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px 18px;
-  }
-  .fact .k{
-    font-size:12px;
-    color:var(--muted);
-    margin-bottom:6px;
-  }
-  .fact .v{
-    font-family:'Source Serif 4', serif;
-    font-size:18px;
-    color:var(--ink);
-  }
+  .table-scroll { overflow-x: auto; margin: 0 0 14px; }
+  table { border-collapse: collapse; width: 100%; min-width: 440px; font-size: .98rem; }
+  caption { text-align: left; font-family: var(--sans); font-weight: 600; font-size: .92rem; color: var(--ink-soft); padding-bottom: 10px; }
+  th, td { text-align: left; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--line); }
+  thead th { font-family: var(--sans); font-weight: 650; font-size: .9rem; border-bottom: 1px solid var(--ink-soft); }
+  th:not(:first-child), td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; padding-left: 14px; }
+  mark { background: var(--mark); color: var(--mark-ink); padding: 2px 6px; border-radius: 3px; }
 
-  /* ---------------- FLOW DIAGRAMS ---------------- */
-  .flow{
-    margin-top:28px;
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-  }
-  .flow-step{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    position:relative;
-    padding:9px 0;
-  }
-  .flow-dot{
-    flex:0 0 auto;
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    background:var(--accent);
-  }
-  .flow-connector{
-    width:1px;
-    background:var(--line);
-    height:22px;
-    margin-left:4.5px;
-  }
-  .flow-label{
-    font-size:15px;
-    color:var(--ink);
-  }
-  .flow-label .sub{
-    display:block;
-    font-size:12.5px;
-    color:var(--muted);
-    margin-top:2px;
-  }
+  dl { margin: 0; }
+  dt { font-family: var(--sans); font-weight: 650; font-size: 1rem; }
+  dd { margin: 2px 0 18px; color: var(--ink-soft); }
+  dd:last-child { margin-bottom: 0; }
+  .tight { margin: 0; padding-left: 1.2em; }
+  .tight li { margin-bottom: .45em; }
 
-  /* ---------------- DOMAIN EXAMPLES TABLE ---------------- */
-  .domain-list{
-    margin-top:22px;
-    border-top:1px solid var(--line);
-  }
-  .domain-row{
-    display:grid;
-    grid-template-columns:160px 1fr;
-    gap:18px;
-    padding:13px 0;
-    border-bottom:1px solid var(--line);
-    align-items:baseline;
-  }
-  .domain-row .domain-name{
-    font-family:'Source Serif 4', serif;
-    font-size:15.5px;
-    color:var(--ink);
-  }
-  .domain-row .domain-desc{
-    color:var(--muted);
-    font-size:14.5px;
-  }
+  .people { list-style: none; margin: 0 0 1em; padding: 0; }
+  .people li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .people li:last-child { border-bottom: 0; }
+  .people span { color: var(--ink-soft); font-size: .92rem; margin-left: 8px; }
 
-  /* ---------------- CONTACT ---------------- */
-  .contact-grid{
-    margin-top:22px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
+  /* ---------- privacy intro ---------- */
+  .page-head { padding: 64px 0 40px; }
+  .page-head h1 { margin-bottom: 14px; }
+  .summary {
+    margin: 34px 0 0; padding: 22px 26px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--signal); border-radius: 6px; max-width: 70ch;
   }
-  .contact-grid .k{
-    font-size:12px;
-    color:var(--muted);
-    margin-bottom:5px;
-  }
-  .contact-grid .v{
-    font-size:15px;
-    color:var(--ink);
-  }
+  .summary h2 { font-family: var(--sans); font-size: 1rem; font-weight: 650; margin: 0 0 10px; }
+  .summary ul { margin: 0; padding-left: 1.2em; }
+  .summary li { margin-bottom: .4em; }
+  .summary li:last-child { margin-bottom: 0; }
 
-  /* ---------------- FOOTER ---------------- */
-  footer{
-    background:var(--navy);
-    color:#9FA8B3;
-    padding:36px 0;
-    text-align:center;
-  }
-  footer .line1{
-    font-family:'Source Serif 4', serif;
-    color:#EDEBE4;
-    font-size:15px;
-    margin-bottom:6px;
-  }
-  footer .line2{
-    font-size:13px;
-    color:#7C8794;
-  }
+  .placeholder { background: var(--mark); color: var(--mark-ink); padding: 1px 6px; border-radius: 3px; }
 
-  /* ---------------- RESPONSIVE ---------------- */
-  @media (max-width: 680px){
-    .navlinks{ display:none; }
-    .cardgrid{ grid-template-columns:1fr 1fr; }
-    .domain-row{ grid-template-columns:1fr; gap:4px; }
-    .contact-grid{ grid-template-columns:1fr; }
+  footer {
+    margin-top: 40px; padding: 28px 0 44px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans); font-size: .9rem; color: var(--ink-soft);
   }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+  footer p { margin: 0; }
 
-  /* Respect reduced motion preference */
-  @media (prefers-reduced-motion: reduce){
-    html{ scroll-behavior:auto; }
-    *{ animation:none !important; transition:none !important; }
+  @media (max-width: 820px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding: 44px 0 40px; }
+    .row { grid-template-columns: 1fr; gap: 12px; padding: 32px 0; }
+    .wrap { padding: 0 20px; }
+    .page-head { padding: 40px 0 28px; }
   }
-
-  /* Visible keyboard focus */
-  a:focus-visible, button:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:2px;
-  }
-
-  /* Single orchestrated entrance for the hero only */
-  #hero h1, #hero .subtitle, #hero p.desc, #hero .badges{
-    opacity:0;
-    animation:rise .6s ease forwards;
-  }
-  #hero h1{ animation-delay:.05s; }
-  #hero .subtitle{ animation-delay:.15s; }
-  #hero p.desc{ animation-delay:.25s; }
-  #hero .badges{ animation-delay:.35s; }
-  @keyframes rise{
-    from{ opacity:0; transform:translateY(8px); }
-    to{ opacity:1; transform:translateY(0); }
+  @media (max-width: 480px) {
+    .brand-name { font-size: .95rem; }
+    nav a { padding: 6px 8px; font-size: .9rem; }
   }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<!-- ============================================================
-     STICKY NAVIGATION
-     Links scroll smoothly to sections on this same page.
-     ============================================================ -->
-<nav id="topnav">
-  <div class="navwrap">
-    <div class="brandmark">Semantic Search Ranking · Privacy Policy</div>
-    <div class="navlinks">
-      <a href="#overview">Overview</a>
-      <a href="#data">Data</a>
-      <a href="#howused">How it's used</a>
-      <a href="#embeddings">Embeddings</a>
-      <a href="#process">Process</a>
-      <a href="#security">Security</a>
-      <a href="#adaptability">Adaptability</a>
-      <a href="#prototype">Prototype</a>
-      <a href="#contact">Contact</a>
-    </div>
-  </div>
-</nav>
-
-<!-- ============================================================
-     HERO
-     ============================================================ -->
-<header id="hero">
-  <div class="wrap">
-    <div class="kicker">Privacy Policy</div>
-    <h1>NLP-Based Semantic Search Ranking Model</h1>
-    <div class="subtitle">Using Sentence-BERT for Improving Search Accuracy</div>
-    <p class="desc">An NLP-based semantic search and ranking system designed to understand the meaning of search queries and improve the relevance of retrieved information.</p>
-    <div class="badges">
-      <span class="badge">Sentence-BERT</span>
-      <span class="badge">Semantic Search</span>
-      <span class="badge">Machine Learning</span>
-    </div>
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="#about" data-route="about">
+      <svg width="24" height="18" viewBox="0 0 24 18" aria-hidden="true">
+        <rect x="0" y="0" width="24" height="4" rx="1" fill="currentColor"/>
+        <rect x="0" y="7" width="15" height="4" rx="1" fill="currentColor" opacity=".7"/>
+        <rect x="0" y="14" width="9" height="4" rx="1" fill="currentColor" opacity=".45"/>
+      </svg>
+      <span class="brand-name">Semantic Search Ranking</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="#about" data-nav="about">About</a>
+      <a href="#privacy" data-nav="privacy">Privacy Policy</a>
+    </nav>
   </div>
 </header>
 
-<main class="wrap">
+<main id="main">
 
-  <!-- ============================================================
-       2. OVERVIEW
-       ============================================================ -->
-  <section class="block" id="overview">
-    <div class="label">Overview</div>
-    <h2 class="htitle">A research prototype for meaning-based search</h2>
-    <p class="lede">This system is a research prototype that applies Natural Language Processing and Sentence-BERT to process text, generate embeddings, compare semantic similarity, and rank search results by relevance rather than by exact keyword matching.</p>
-    <p class="lede">The current prototype is developed and tested in Google Colab, using Python. It is not yet a deployed production application.</p>
-  </section>
-
-  <!-- ============================================================
-       3. DATA WE PROCESS
-       ============================================================ -->
-  <section class="block" id="data">
-    <div class="label">Data We Process</div>
-    <h2 class="htitle">What the current prototype works with</h2>
-    <p class="lede">While training and testing the model, the prototype processes the following types of text data:</p>
-    <ul class="plain">
-      <li>Search queries</li>
-      <li>Product names and descriptions</li>
-      <li>Product categories and related textual information</li>
-      <li>Relevance-labeled query–product pairs</li>
-      <li>Model training and testing data</li>
-    </ul>
-    <p class="lede" style="margin-top:16px;">The current dataset is product-focused because it provides a clear, well-labeled environment for evaluating search relevance. This is a choice about the current evaluation setting, not a permanent limitation of the underlying architecture — see <a href="#adaptability">Adaptability to Other Systems</a> below.</p>
-  </section>
-
-  <!-- ============================================================
-       4. HOW DATA IS USED
-       ============================================================ -->
-  <section class="block" id="howused">
-    <div class="label">How Data Is Used</div>
-    <h2 class="htitle">Purpose: information retrieval and ranking</h2>
-    <p class="lede">Data processed by the prototype is used to:</p>
-    <ul class="plain">
-      <li>Generate Sentence-BERT embeddings</li>
-      <li>Compare query and product meaning</li>
-      <li>Retrieve relevant candidates</li>
-      <li>Train the ranking model</li>
-      <li>Evaluate ranking performance</li>
-      <li>Improve search accuracy</li>
-    </ul>
-    <p class="lede" style="margin-top:16px;">The purpose of this processing is information retrieval and ranking — helping a search system surface results that are semantically relevant to a query, not simply results that share the same words.</p>
-  </section>
-
-  <!-- ============================================================
-       5. SENTENCE-BERT AND EMBEDDINGS
-       ============================================================ -->
-  <section class="block" id="embeddings">
-    <div class="label">Sentence-BERT and Embeddings</div>
-    <h2 class="htitle">How text becomes a comparable representation</h2>
-    <p class="lede">An embedding is a numerical representation of text that captures its semantic meaning, allowing two pieces of text to be compared mathematically for similarity rather than just matched word-for-word.</p>
-
-    <div class="flow">
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Text<span class="sub">raw query or product text</span></span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Sentence-BERT<span class="sub">the NLP model used to encode meaning</span></span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">384-dimensional embedding<span class="sub">a numerical vector representing that meaning</span></span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Semantic comparison<span class="sub">measuring similarity between vectors</span></span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Ranking<span class="sub">ordering results by relevance</span></span></div>
-    </div>
-
-    <p class="lede" style="margin-top:22px;">The current Sentence-BERT implementation produces embeddings with 384 dimensions.</p>
-  </section>
-
-  <!-- ============================================================
-       6. SEARCH AND RANKING PROCESS
-       ============================================================ -->
-  <section class="block" id="process">
-    <div class="label">Search and Ranking Process</div>
-    <h2 class="htitle">From a query to ranked results</h2>
-    <p class="lede">The ranking model uses the processed query and product information to determine relevance in the following sequence:</p>
-
-    <div class="flow">
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">User Query</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Sentence-BERT</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Query Embedding</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Compare with Product Embeddings</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Candidate Results</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Ranking Model</span></div>
-      <div class="flow-connector"></div>
-      <div class="flow-step"><span class="flow-dot"></span><span class="flow-label">Ranked Search Results</span></div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       7. DATA SECURITY AND PRIVACY
-       ============================================================ -->
-  <section class="block" id="security">
-    <div class="label">Data Security and Privacy</div>
-    <h2 class="htitle">Basic secure-data-handling principles</h2>
-    <p class="lede">As a research prototype, this project follows basic secure-data-handling principles during development:</p>
-    <ul class="plain">
-      <li>Only necessary data is processed for training, testing, and evaluation.</li>
-      <li>Training and testing data should be accessed only by authorized developers.</li>
-      <li>Personal or sensitive information should not be included unnecessarily in datasets.</li>
-      <li>Data should not be exposed to unauthorized users.</li>
-      <li>When integrated into another information system, the search engine should follow that system's own security and privacy requirements.</li>
-    </ul>
-    <div class="note">The current Google Colab prototype does not provide production-level security. It has not been evaluated or certified against enterprise or production security standards, and should be treated as a research and development environment rather than a hardened deployment.</div>
-  </section>
-
-  <!-- ============================================================
-       8. DATA SHARING
-       ============================================================ -->
-  <section class="block" id="sharing">
-    <div class="label">Data Sharing</div>
-    <h2 class="htitle">This search engine does not sell or advertise with your data</h2>
-    <p class="lede">The search engine is not designed to sell user search information or use it for advertising purposes.</p>
-    <p class="lede">When integrated into another system, data-sharing practices will depend on the policies and security controls of that host system, not on this prototype itself.</p>
-  </section>
-
-  <!-- ============================================================
-       9. DATA RETENTION
-       ============================================================ -->
-  <section class="block" id="retention">
-    <div class="label">Data Retention</div>
-    <h2 class="htitle">Why research data is kept during development</h2>
-    <p class="lede">Research and training data may be retained during development in order to:</p>
-    <ul class="plain">
-      <li>Train the ranking model</li>
-      <li>Evaluate performance</li>
-      <li>Compare model improvements</li>
-      <li>Reproduce experiments</li>
-    </ul>
-    <p class="lede" style="margin-top:16px;">The retention period for a future deployed version will depend on the system where the search engine is integrated.</p>
-  </section>
-
-  <!-- ============================================================
-       10. ADAPTABILITY TO OTHER SYSTEMS
-       ============================================================ -->
-  <section class="block" id="adaptability">
-    <div class="label">Adaptability to Other Systems</div>
-    <h2 class="htitle">Built on product data, not limited to it</h2>
-    <p class="lede">Although the current prototype uses product data, the semantic search architecture is not limited to products. Sentence-BERT can generate embeddings from textual data in different domains.</p>
-
-    <div class="domain-list">
-      <div class="domain-row">
-        <div class="domain-name">E-commerce</div>
-        <div class="domain-desc">Product information</div>
+  <!-- ================= ABOUT ================= -->
+  <section id="view-about" class="view" aria-labelledby="about-title">
+    <div class="wrap">
+      <div class="hero">
+        <div>
+          <h1 id="about-title">Search results ranked by meaning, not just matching words.</h1>
+          <p class="lead">This research project builds a search ranking system that reads a query the way a person means it. It blends classic keyword scoring with Sentence-BERT, then uses a trained classifier to judge how relevant each result really is.</p>
+        </div>
+        <figure class="rank-panel" aria-labelledby="rank-title">
+          <figcaption id="rank-title">What a good result is worth, by position</figcaption>
+          <ol class="rank-list">
+            <li style="--i:0; --w:100"><span class="pos">1</span><span class="track"><span class="rank-bar"></span></span><span class="val">1.00</span></li>
+            <li style="--i:1; --w:63"><span class="pos">2</span><span class="track"><span class="rank-bar"></span></span><span class="val">0.63</span></li>
+            <li style="--i:2; --w:50"><span class="pos">3</span><span class="track"><span class="rank-bar"></span></span><span class="val">0.50</span></li>
+            <li style="--i:3; --w:43"><span class="pos">4</span><span class="track"><span class="rank-bar"></span></span><span class="val">0.43</span></li>
+            <li style="--i:4; --w:39"><span class="pos">5</span><span class="track"><span class="rank-bar"></span></span><span class="val">0.39</span></li>
+          </ol>
+          <p class="rank-note">The NDCG metric gives each position the credit 1 ÷ log₂(rank + 1), so the best result counts most when it sits at the very top.</p>
+        </figure>
       </div>
-      <div class="domain-row">
-        <div class="domain-name">School</div>
-        <div class="domain-desc">Documents and learning resources</div>
+
+      <div class="row">
+        <h2>The problem it solves</h2>
+        <div class="body">
+          <p>Keyword search needs the same words in the query and in the listing. Someone who types “device for pointing and clicking” never typed “mouse”, so a keyword engine has almost nothing to match.</p>
+          <p>On our paraphrased test queries, TF-IDF keyword search scored an NDCG@5 of 0.25, while semantic search scored 0.62.</p>
+        </div>
       </div>
-      <div class="domain-row">
-        <div class="domain-name">Library</div>
-        <div class="domain-desc">Book information</div>
+
+      <div class="row">
+        <h2>How it works</h2>
+        <div class="body">
+          <ol class="steps">
+            <li><strong>Read the query</strong>Sentence-BERT converts the query, and every record in the catalogue, into 384 numbers. Records with similar meaning end up with similar numbers.</li>
+            <li><strong>Find close matches</strong>An exact cosine-similarity search (FAISS) finds the nearest records. TF-IDF and BM25 add keyword evidence, and the three scores are blended into one hybrid score.</li>
+            <li><strong>Judge relevance</strong>A compact neural network we trained rates each query and result pair as not relevant, somewhat relevant or highly relevant, and reports how confident it is.</li>
+            <li><strong>Rank the list</strong>Results are ordered so the best match sits first. Precision@5 and NDCG@5 measure how well that works.</li>
+          </ol>
+        </div>
       </div>
-      <div class="domain-row">
-        <div class="domain-name">Business</div>
-        <div class="domain-desc">Services and records</div>
+
+      <div class="row">
+        <h2>What it searches</h2>
+        <div class="body">
+          <p>Two datasets: 13,388 product listings, and statistics for 167 countries such as income, child mortality and life expectancy. Each dataset has its own search index.</p>
+        </div>
       </div>
-      <div class="domain-row">
-        <div class="domain-name">Other information systems</div>
-        <div class="domain-desc">Text-based records</div>
+
+      <div class="row">
+        <h2>Results so far</h2>
+        <div class="body">
+          <div class="table-scroll">
+            <table>
+              <caption>Paraphrased queries: 10 searches that share no key words with the product names</caption>
+              <thead><tr><th scope="col">Method</th><th scope="col">Precision@5</th><th scope="col">NDCG@5</th></tr></thead>
+              <tbody>
+                <tr><th scope="row" style="font-weight:500">TF-IDF keyword search</th><td>32%</td><td>0.250</td></tr>
+                <tr><th scope="row" style="font-weight:500">BM25 keyword search</th><td>26%</td><td>0.230</td></tr>
+                <tr><th scope="row" style="font-weight:500">Semantic search (Sentence-BERT)</th><td>62%</td><td><mark>0.619</mark></td></tr>
+                <tr><th scope="row" style="font-weight:500">Hybrid, tuned weights</th><td><mark>66%</mark></td><td>0.604</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">Highlighted: the best value in each column.</p>
+          <p>The relevance classifier reached about 90% test accuracy on a held-out 20% of 1,150 labelled query and product pairs.</p>
+          <p>Semantic search is the clear gain over keyword search. The hybrid performs about the same as semantic search on this small benchmark, so we do not claim it is better.</p>
+          <p class="small">These figures come from the team’s own benchmark of 10 paraphrased queries, and the relevance labels were generated by a rule-based method. Read them as evidence that the approach works on this data, not as a guarantee elsewhere.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2>The team</h2>
+        <div class="body">
+          <p>NLP-Based Semantic Search Ranking Model Using Sentence-BERT for Improving Search Accuracy</p>
+          <ul class="people">
+            <li>Jerome Cabasag</li>
+            <li>Christian Mark Eblacas</li>
+            <li>Franz Paslaaw</li>
+            <li>Leomar Nuevo<span>Instructor</span></li>
+          </ul>
+          <p class="small">This is an academic prototype built for coursework, not a commercial product.</p>
+        </div>
       </div>
     </div>
-
-    <p class="lede" style="margin-top:20px;">The general Sentence-BERT embedding and retrieval components can be reused across domains, while a supervised ranking model may require retraining or additional labeled data when applied to a substantially different domain.</p>
   </section>
 
-  <!-- ============================================================
-       11. CURRENT PROTOTYPE
-       ============================================================ -->
-  <section class="block" id="prototype">
-    <div class="label">Current Prototype</div>
-    <h2 class="htitle">Where things stand today</h2>
-    <div class="cardgrid">
-      <div class="fact"><div class="k">Development Platform</div><div class="v">Google Colab</div></div>
-      <div class="fact"><div class="k">Programming Language</div><div class="v">Python</div></div>
-      <div class="fact"><div class="k">NLP Model</div><div class="v">Sentence-BERT</div></div>
-      <div class="fact"><div class="k">Embedding Dimension</div><div class="v">384</div></div>
-      <div class="fact"><div class="k">Current Dataset</div><div class="v">Product Dataset</div></div>
-      <div class="fact"><div class="k">Training Examples</div><div class="v">300 labeled pairs</div></div>
-      <div class="fact"><div class="k">Current Evaluation</div><div class="v">80% test accuracy</div></div>
-    </div>
-    <p class="lede" style="margin-top:20px;">These values represent the current research prototype and may change as the model is improved.</p>
-  </section>
-
-  <!-- ============================================================
-       12. USER RIGHTS
-       ============================================================ -->
-  <section class="block" id="rights">
-    <div class="label">User Rights</div>
-    <h2 class="htitle">If this engine is integrated into a live system</h2>
-    <p class="lede">If the search engine is integrated into an information system that collects personal information, the host system should provide appropriate mechanisms for users to access, correct, or request deletion of their personal information where applicable.</p>
-  </section>
-
-  <!-- ============================================================
-       13. CONTACT / DEVELOPMENT
-       ============================================================ -->
-  <section class="block" id="contact">
-    <div class="label">Contact / Development</div>
-    <h2 class="htitle">Project details</h2>
-    <div class="contact-grid">
-      <div>
-        <div class="k">Project</div>
-        <div class="v">NLP-Based Semantic Search Ranking Model Using Sentence-BERT for Improving Search Accuracy</div>
+  <!-- ================= PRIVACY ================= -->
+  <section id="view-privacy" class="view" aria-labelledby="privacy-title">
+    <div class="wrap">
+      <div class="page-head">
+        <h1 id="privacy-title">Privacy Policy</h1>
+        <p class="lead">How the semantic search ranking system handles information. Last updated October 2026.</p>
+        <div class="summary">
+          <h2>The short version</h2>
+          <ul>
+            <li>The system has no accounts and does not ask for your name, email or any personal details.</li>
+            <li>A search query is used only to produce ranked results.</li>
+            <li>Nothing is sold, shared for advertising, or used to track you.</li>
+          </ul>
+        </div>
       </div>
-      <div>
-        <div class="k">Purpose</div>
-        <div class="v">Improving search accuracy through semantic understanding and machine-learning-based ranking.</div>
+
+      <div class="row">
+        <h2><span class="n">1</span>Overview</h2>
+        <div class="body">
+          <p>This policy covers the semantic search ranking system described on the About page. It is a search and ranking component built as an academic research project. It has no sign-in, profiles or user interface of its own: it receives a search query from whichever application uses it and returns a ranked list of results.</p>
+        </div>
       </div>
-      <div>
-        <div class="k">Platform</div>
-        <div class="v">Google Colab</div>
+
+      <div class="row">
+        <h2><span class="n">2</span>Information the system processes</h2>
+        <div class="body">
+          <dl>
+            <dt>Search queries</dt>
+            <dd>The text typed into a search box, sent to the system so it can rank results.</dd>
+            <dt>Catalogue data</dt>
+            <dd>The product listings and country statistics the system searches. They contain product names, categories and country-level indicators, not personal information.</dd>
+            <dt>Relevance scores</dt>
+            <dd>The scores and labels the system calculates for each result.</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">3</span>Information it does not collect</h2>
+        <div class="body">
+          <p>Names, email addresses, passwords, phone numbers, payment details, precise location, contacts, photos, or access to a device’s camera or microphone.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">4</span>How information is used</h2>
+        <div class="body">
+          <p>A query is converted into numbers with Sentence-BERT, compared with the catalogue, and scored using keyword methods (TF-IDF and BM25) and a trained relevance classifier. The ranked list goes back to the application that asked. Queries are not used for advertising, profiling or sale.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">5</span>Where processing happens</h2>
+        <div class="body">
+          <p>The language model, search index and classifier run inside the system’s own service. Model files are downloaded when the service is set up; queries are not sent to an outside AI provider to produce results.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">6</span>Logs and retention</h2>
+        <div class="body">
+          <p>The system is designed not to keep a history of search queries. The server or hosting platform that runs the service may record routine technical details, such as the time of a request and the network address it came from, for troubleshooting and security. The team does not use these records to identify or profile anyone.</p>
+          <p>The catalogue data and trained model files are kept for the life of the project.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">7</span>Security</h2>
+        <div class="body">
+          <p>The project’s security test plan covers:</p>
+          <ul class="tight">
+            <li>Cleaning search input against injection and script attacks</li>
+            <li>Rejecting empty, oversized or malformed requests</li>
+            <li>Rate limits to prevent abuse and scraping</li>
+            <li>Generic error messages that reveal no internal details</li>
+            <li>Encrypted HTTPS connections when the service is deployed</li>
+            <li>Checks that the model files have not been tampered with</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">8</span>Open-source components</h2>
+        <div class="body">
+          <p>Sentence-BERT (all-MiniLM-L6-v2) creates the text embeddings, FAISS performs similarity search, scikit-learn provides TF-IDF, rank_bm25 provides BM25 scoring, and TensorFlow with Keras runs the relevance classifier. They run as libraries inside the service.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">9</span>Use inside other applications</h2>
+        <div class="body">
+          <p>This system is meant to be built into other applications. Those applications manage their own accounts, sign-in and data, and their own privacy policies apply to that information. Read them alongside this one.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">10</span>Children</h2>
+        <div class="body">
+          <p>The system is built for academic, business and research use and is not directed at children. It does not knowingly collect personal information from anyone, including children under 13.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">11</span>Your choices</h2>
+        <div class="body">
+          <p>Because the system does not collect personal information, there is normally nothing to access, correct or delete. If you think a query or other information was recorded, contact the team and we will look into it.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">12</span>Changes to this policy</h2>
+        <div class="body">
+          <p>We may update this policy as the system changes. The date at the top of this page shows when it last changed.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2><span class="n">13</span>Contact</h2>
+        <div class="body">
+          <p>Questions about this policy: <span class="placeholder">add your team email here</span></p>
+          <ul class="people">
+            <li>Jerome Cabasag</li>
+            <li>Christian Mark Eblacas</li>
+            <li>Franz Paslaaw</li>
+            <li>Leomar Nuevo<span>Instructor</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
 </main>
 
-<!-- ============================================================
-     FOOTER
-     ============================================================ -->
 <footer>
   <div class="wrap">
-    <div class="line1">Research Prototype · August 2026</div>
-    <div class="line2">Smart Search. Better Relevance.</div>
+    <p>An academic research project. Instructor: Leomar Nuevo.</p>
+    <p>© 2026 Jerome Cabasag, Christian Mark Eblacas and Franz Paslaaw</p>
   </div>
 </footer>
 
 <script>
-  // Smooth-scroll for nav links (also works without JS via CSS scroll-behavior,
-  // this just keeps focus management sensible for keyboard/screen-reader users).
-  document.querySelectorAll('#topnav a[href^="#"]').forEach(function(link){
-    link.addEventListener('click', function(e){
-      var target = document.querySelector(this.getAttribute('href'));
-      if(target){
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        target.setAttribute('tabindex', '-1');
-        target.focus({ preventScroll: true });
-      }
+(function () {
+  var views = { about: document.getElementById('view-about'), privacy: document.getElementById('view-privacy') };
+  var titles = {
+    about: 'About — Semantic Search Ranking Model',
+    privacy: 'Privacy Policy — Semantic Search Ranking Model'
+  };
+  var navLinks = document.querySelectorAll('[data-nav]');
+
+  function render(key, scroll) {
+    if (!views[key]) key = 'about';
+    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== key); });
+    navLinks.forEach(function (a) {
+      if (a.getAttribute('data-nav') === key) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    document.title = titles[key];
+    if (scroll) window.scrollTo(0, 0);
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    var href = a.getAttribute('href');
+    if (href === '#main') return;
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var key = href.slice(1);
+      render(key, true);
+      try { history.replaceState(null, '', href); } catch (err) {}
     });
   });
-</script>
 
+  window.addEventListener('hashchange', function () {
+    var key = (location.hash || '#about').slice(1);
+    if (views[key]) render(key, true);   // ignore other hashes, e.g. the skip link's #main
+  });
+
+  render((location.hash || '#about').slice(1), false);
+})();
+</script>
 </body>
 </html>
